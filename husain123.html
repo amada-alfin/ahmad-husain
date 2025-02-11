@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Husain</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <style>
+        /* Gaya dasar untuk tata letak */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgb(1, 240, 140);
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        .kalkulator {
+            width: 280px;
+            background-color: aliceblue;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .kalkulator input {
+            width: 100%;
+            height: 50px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: right;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .button {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f00000;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .btn:active {
+            background-color: #ff4444;
+        }
+
+        .operator {
+            background-color: #4caf50;
+        }
+
+        .operator:active {
+            background-color: #45a049;
+        }
+
+        .clear {
+            grid-column: span 4;
+            background-color: #f10f0f;
+            color: white;
+        }
+
+        .clear:active {
+            background-color: #1c8f3e;
+        }
+
+        .trig {
+            background-color: #3498db;
+        }
+
+        .trig:active {
+            background-color: #2980b9;
+        }
+
+        .history {
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid #009bf5;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .history p span {
+            color: #888;
+        }
+
+        @media (max-width: 500px) {
+            .kalkulator {
+                width: 90%;
+            }
+        }
+    </style>
+
+    <!-- Calculator -->
+    <div class="kalkulator" id="calculator">
+        <input type="text" id="display" disabled>
+        <div class="button">
+            <button class="btn" onclick="appendValue('7')">7</button>
+            <button class="btn" onclick="appendValue('8')">8</button>
+            <button class="btn" onclick="appendValue('9')">9</button>
+            <button class="btn operator" onclick="appendValue('/')">/</button>
+            <button class="btn" onclick="appendValue('4')">4</button>
+            <button class="btn" onclick="appendValue('5')">5</button>
+            <button class="btn" onclick="appendValue('6')">6</button>
+            <button class="btn operator" onclick="appendValue('*')">X</button>
+            <button class="btn" onclick="appendValue('1')">1</button>
+            <button class="btn" onclick="appendValue('2')">2</button>
+            <button class="btn" onclick="appendValue('3')">3</button>
+            <button class="btn operator" onclick="appendValue('-')">-</button>
+            <button class="btn" onclick="appendValue('0')">0</button>
+            <button class="btn" onclick="appendValue('.')">.</button>
+            <button class="btn" onclick="calculator()">=</button>
+            <button class="btn operator" onclick="appendValue('+')">+</button>
+
+            <!-- Trigonometric tombol -->
+            <button class="btn trig" onclick="calculateTrig('sin')">sin</button>
+            <button class="btn trig" onclick="calculateTrig('cos')">cos</button>
+            <button class="btn trig" onclick="calculateTrig('tan')">tan</button>
+
+            <!-- tombol hapus (Full pengulangan) -->
+            <button class="btn clear" onclick="clearDisplay()">Reset</button>
+
+            <!-- tombol hapus (ruang belakang) -->
+            <button class="btn clear" onclick="deleteLastCharacter()">Delete</button>
+        </div>
+        
+        <div class="history" id="history"></div>
+    </div>
+
+    <div class="footer">
+        <p>Di buat oleh: Ahmad Husain</p>
+    </div>
+
+    <script>
+        let history = [];
+
+        // menambahkan nilai ke tampilan
+        function appendValue(value) {
+            document.getElementById("display").value += value;
+        }
+
+        // membersihkan layar
+        function clearDisplay() {
+            document.getElementById("display").value = "";
+        }
+
+        // hapus karakter terakhir di tampilan
+        function deleteLastCharacter() {
+            let display = document.getElementById("display");
+            display.value = display.value.slice(0, -1);
+        }
+
+        // melakukan perhitungan
+        function calculator() {
+            const display = document.getElementById("display");
+            try {
+                let result = eval(display.value);
+                display.value = result;
+                addToHistory(display.value + " = " + result);
+            } catch {
+                display.value = "Error";
+            }
+        }
+
+        // Perhitungan trigonometri dengan pembulatan
+        function calculateTrig(func) {
+            const display = document.getElementById("display");
+            let value = parseFloat(display.value);
+
+            // Periksa apakah yang dimasukkan adalah angka yang valid
+            if (isNaN(value)) {
+                display.value = "Error";
+                return;
+            }
+
+            // Ubah derajat menjadi radian
+            let radian = value * (Math.PI / 180);
+            let result;
+
+            if (func === 'sin') {
+                result = Math.sin(radian);
+            } else if (func === 'cos') {
+                result = Math.cos(radian);
+            } else if (func === 'tan') {
+                result = Math.tan(radian);
+            }
+
+            // Bulatkan hasilnya menjadi 2 tempat desimal
+            result = result.toFixed(2);
+
+            display.value = result;
+            addToHistory(func + "(" + value + "°) = " + result);
+        }
+
+        // Tambahkan hasil ke riwayat
+        function addToHistory(entry) {
+            history.push(entry);
+            if (history.length > 5) {
+                history.shift();
+            }
+            updateHistory();
+        }
+
+        // Perbarui tampilan riwayat
+        function updateHistory() {
+            const historyContainer = document.getElementById("history");
+            historyContainer.innerHTML = '';
+            history.forEach(item => {
+                const p = document.createElement("p");
+                p.textContent = item;
+                historyContainer.appendChild(p);
+            });
+        }
+    </script>
+</body>
+</html>
